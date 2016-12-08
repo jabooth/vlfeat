@@ -26,24 +26,6 @@ BIN_LDFLAGS = $(STD_LDFLAGS) -L$(BINDIR) -lvl -lm
 BIN_LDFLAGS += $(if $(DISABLE_THREADS),,-lpthread)
 BIN_LDFLAGS += $(if $(DISABLE_OPENMP),,-fopenmp)
 
-# Mac OS X Intel 32
-ifeq ($(ARCH),maci)
-endif
-
-# Mac OS X Intel 64
-ifeq ($(ARCH),maci64)
-endif
-
-# Linux-32
-ifeq ($(ARCH),glnx86)
-BIN_LDFLAGS += -Wl,--rpath,\$$ORIGIN/
-endif
-
-# Linux-64
-ifeq ($(ARCH),glnxa64)
-BIN_LDFLAGS += -Wl,--rpath,\$$ORIGIN/
-endif
-
 # --------------------------------------------------------------------
 #                                                                Build
 # --------------------------------------------------------------------
@@ -61,8 +43,8 @@ deps += $(bin_dep)
 arch_bins += $(bin_tgt)
 comm_bins +=
 
-.PHONY: bin-all, bin-info
-.PHONY: bin-clean, bin-archclean, bin-distclean
+.PHONY: bin-all bin-info
+.PHONY: bin-clean bin-archclean bin-distclean
 no_dep_targets += bin-dir bin-clean bin-archclean bin-distclean
 no_dep_targets += bin-info
 

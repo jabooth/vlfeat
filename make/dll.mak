@@ -24,6 +24,7 @@ info: dll-info
 # build the DLL.
 
 DLL_NAME = vl
+API_VERSION := 1
 
 LINK_DLL_CFLAGS = \
 $(if $(DISABLE_THREADS),-DVL_DISABLE_THREADS) \
@@ -52,29 +53,7 @@ $(if $(DISABLE_OPENMP),,-fopenmp)
 
 BINDIR = bin/$(ARCH)
 
-# Mac OS X on Intel 32 bit processor
-ifeq ($(ARCH),maci)
-DLL_SUFFIX := dylib
-DLL_LDFLAGS += -m32
-endif
-
-# Mac OS X on Intel 64 bit processor
-ifeq ($(ARCH),maci64)
-DLL_SUFFIX := dylib
-DLL_LDFLAGS += -m64
-endif
-
-# Linux-32
-ifeq ($(ARCH),glnx86)
 DLL_SUFFIX := so
-DLL_LDFLAGS += -m32
-endif
-
-# Linux-64
-ifeq ($(ARCH),glnxa64)
-DLL_SUFFIX := so
-DLL_LDFLAGS += -m64
-endif
 
 # --------------------------------------------------------------------
 #                                                                Build
@@ -96,7 +75,7 @@ comm_bins +=
 deps += $(dll_dep)
 
 .PHONY: dll
-.PHONY: dll-all, dll-clean, dll-archclean, dll-distclean
+.PHONY: dll-all dll-clean dll-archclean dll-distclean
 .PHONY: dll-info
 no_dep_targets += dll-dir dll-clean dll-archclean dll-distclean
 no_dep_targets += dll-info
@@ -136,6 +115,7 @@ $(BINDIR)/lib$(DLL_NAME).so : $(dll_obj)
 	$(call C,CC) -shared                                    \
 	    $(^)                                                \
 	    $(DLL_LDFLAGS)	                                \
+	    -Wl,-soname,lib$(DLL_NAME).so.$(API_VERSION)        \
 	    -o "$(@)"
 
 dll-clean:

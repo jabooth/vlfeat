@@ -299,7 +299,7 @@ doc/index.html: $(webdoc_src) $(doc-dir) \
 #                                               Maintenance and others
 # --------------------------------------------------------------------
 
-.PHONY: doc-clean, doc-archclean, doc-distclean
+.PHONY: doc-clean doc-archclean doc-distclean
 no_dep_targets += doc-clean doc-archclean doc-distclean
 
 VERSION: vl/generic.h

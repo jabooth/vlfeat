@@ -96,20 +96,14 @@ SHELL = /bin/bash
 all:
 
 # Select which features to disable
-# DISABLE_SSE2=yes
-# DISABLE_AVX=yes
+DISABLE_SSE2=yes
+DISABLE_AVX=yes
 # DISABLE_THREADS=yes
 # DISABLE_OPENMP=yes
 
 # --------------------------------------------------------------------
 #                                                       Error Messages
 # --------------------------------------------------------------------
-
-err_no_arch  =
-err_no_arch +=$(shell echo "** Unknown host architecture '$(UNAME)'. This identifier"   1>&2)
-err_no_arch +=$(shell echo "** was obtained by running 'uname -sm'. Edit the Makefile " 1>&2)
-err_no_arch +=$(shell echo "** to add the appropriate configuration."                   1>&2)
-err_no_arch +=config
 
 err_internal  =$(shell echo Internal error)
 err_internal +=internal
@@ -122,22 +116,7 @@ err_spaces +=spaces
 #                                             Auto-detect architecture
 # --------------------------------------------------------------------
 
-Darwin_PPC_ARCH := mac
-Darwin_Power_Macintosh_ARCH := mac
-Darwin_i386_ARCH := maci64
-Darwin_x86_64_ARCH := maci64
-Linux_i386_ARCH := glnx86
-Linux_i686_ARCH := glnx86
-Linux_unknown_ARCH := glnx86
-Linux_x86_64_ARCH := glnxa64
-
-UNAME := $(shell uname -sm)
-ARCH ?= $($(shell echo "$(UNAME)" | tr \  _)_ARCH)
-
-# sanity check
-ifeq ($(ARCH),)
-die:=$(error $(err_no_arch))
-endif
+ARCH := debian
 
 ifneq ($(VLDIR),$(shell echo "$(VLDIR)" | sed 's/ //g'))
 die:=$(error $(err_spaces))
@@ -150,7 +129,7 @@ endif
 VLDIR ?= .
 LIBTOOL ?= libtool
 
-STD_CLFAGS = $(CFLAGS)
+STD_CFLAGS = $(CFLAGS) $(CPPFLAGS)
 STD_CFLAGS += -std=c99
 STD_CFLAGS += -Wall -Wextra
 STD_CFLAGS += -Wno-unused-function -Wno-long-long -Wno-variadic-macros
@@ -205,46 +184,12 @@ DISABLE_OPENMP:=yes
 endif
 endif
 
-# Mac OS X Intel
-ifeq "$(ARCH)" "$(filter $(ARCH),maci maci64)"
-ifeq "$(ARCH)" "maci"
-march=32
-else
-march=64
-endif
-SDKROOT ?= $(shell xcrun -sdk macosx --show-sdk-path)
-MACOSX_DEPLOYMENT_TARGET ?= 10.4
-STD_CFLAGS += -m$(march) -isysroot $(SDKROOT) -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
-STD_LDFLAGS += -Wl,-syslibroot,$(SDKROOT) -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
-endif
-
-# Linux
-ifeq "$(ARCH)" "$(filter $(ARCH),glnx86 glnxa64)"
-ifeq "$(ARCH)" "glnx86"
-march=32
-else
-march=64
-endif
 # Target compatibility with GLIBC 2.3.4
 # 1) _GNU_SOURCE avoids using isoc99_fscanf, limiting binary portability to recent GLIBC.
 # 2) -fno-stack-protector avoids using a feature requiring GLBIC 2.4
-STD_CFLAGS += -m$(march) -D_GNU_SOURCE -fno-stack-protector
-STD_LDFLAGS += -m$(march) -Wl,--rpath,\$$ORIGIN/ -Wl,--as-needed
-endif
-
-# Convert back DISALBE_*="no" flags to be empty
-ifeq "$(DISABLE_SSE2)" "no"
-override DISABLE_SSE2:=
-endif
-ifeq "$(DISABLE_AVX)" "no"
-override DISABLE_AVX:=
-endif
-ifeq "$(DISABLE_THREADS)" "no"
-override DISABLE_THREADS:=
-endif
-ifeq "$(DISABLE_OPENMP)" "no"
-override DISABLE_OPENMP:=
-endif
+STD_CFLAGS += -D_GNU_SOURCE -fno-stack-protector
+STD_LDFLAGS += -Wl,--as-needed -lpthread -lm
+CC ?= gcc
 
 # --------------------------------------------------------------------
 #                                                            Functions
@@ -348,7 +293,6 @@ info:
 	$(call echo-var,PROFILE)
 	$(call echo-var,DEBUG)
 	$(call echo-var,VER)
-	$(call echo-var,ARCH)
 	$(call echo-var,CC)
 	$(call echo-var,COMPILER)
 	$(call echo-var,COMPILER_VER)

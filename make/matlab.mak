@@ -43,21 +43,7 @@ info: mex-info matlab-info
 #                                                Obtain MATLAB version
 # --------------------------------------------------------------------
 
-ifeq ($(ARCH),maci)
-MEX_SUFFIX := mexmaci
-endif
-
-ifeq ($(ARCH),maci64)
-MEX_SUFFIX := mexmaci64
-endif
-
-ifeq ($(ARCH),glnx86)
 MEX_SUFFIX := mexglx
-endif
-
-ifeq ($(ARCH),glnxa64)
-MEX_SUFFIX := mexa64
-endif
 
 MEX_BINDIR := toolbox/mex/$(MEX_SUFFIX)
 
@@ -141,56 +127,8 @@ $(if $(VERB),-v,) \
 $(if $(DEBUG),-g,-O) \
 $(if $(PROFILE),-g -O,)
 
-# Mac OS X on Intel 32 bit processor
-ifeq ($(ARCH),maci)
-MEX_FLAGS += CC='$(CC)'
-MEX_FLAGS += LD='$(CC)'
-# a hack to support recent Xcode/clang/GCC versions on old MATLABs
-MEX_FLAGS += CFLAGS='\
--arch i386 \
--fno-common \
--fexceptions \
-$(call escape,$(STD_CFLAGS))'
-MEX_FLAGS += LDFLAGS='\
--arch i386 \
--Wl,-syslibroot,$(SDKROOT) \
--mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET) \
--bundle -Wl,-exported_symbols_list,$(MATLAB_PATH)/extern/lib/maci/mexFunction.map \
-$(if $(DISABLE_OPENMP),,-L$(MATLAB_PATH)/sys/os/$(ARCH)/) \
-$(call escape,$(STD_LDFLAGS))'
-endif
-
-# Mac OS X on Intel 64 bit processor
-ifeq ($(ARCH),maci64)
-MEX_FLAGS += -largeArrayDims
-MEX_FLAGS += CC='$(CC)'
-MEX_FLAGS += LD='$(CC)'
-MEX_FLAGS += CFLAGS='\
--arch x86_64 \
--fno-common \
--fexceptions \
-$(call escape,$(STD_CFLAGS))'
-MEX_FLAGS += LDFLAGS='\
--arch x86_64 \
--Wl,-syslibroot,$(SDKROOT) \
--mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET) \
--bundle -Wl,-exported_symbols_list,$(MATLAB_PATH)/extern/lib/maci64/mexFunction.map \
-$(if $(DISABLE_OPENMP),,-L$(MATLAB_PATH)/sys/os/$(ARCH)/) \
-$(call escape,$(STD_LDFLAGS))'
-endif
-
-# Linux on 32 bit processor
-ifeq ($(ARCH),glnx86)
 MEX_FLAGS += CFLAGS='$$CFLAGS $(call escape,$(STD_CFLAGS))'
 MEX_FLAGS += LDFLAGS='$$LDFLAGS $(call escape,$(STD_LDFLAGS))'
-endif
-
-# Linux on 64 bit processorm
-ifeq ($(ARCH),glnxa64)
-MEX_FLAGS += -largeArrayDims
-MEX_FLAGS += CFLAGS='$$CFLAGS $(call escape,$(STD_CFLAGS))'
-MEX_FLAGS += LDFLAGS='$$LDFLAGS $(call escape,$(STD_LDFLAGS))'
-endif
 
 # For efficiency reasons, immediately expand this variable once
 MEX_FLAGS := $(MEX_FLAGS)
@@ -210,8 +148,8 @@ endif
 #                                                                Build
 # --------------------------------------------------------------------
 
-.PHONY: mex-all, mex-dir, mex-info, mex-test
-.PHONY: mex-clean, mex-distclean, mex-archclean
+.PHONY: mex-all mex-dir mex-info mex-test
+.PHONY: mex-clean mex-distclean mex-archclean
 no_dep_targets += mex-dir mex-info mex-test
 no_dep_targets += mex-clean mex-distclean mex-archclean
 
@@ -324,8 +262,8 @@ m_lnk += $(addprefix toolbox/noprefix/,                              \
 
 vpath vl_%.m $(shell find $(VLDIR)/toolbox -type d)
 
-.PHONY: matlab-all, matlab-noprefix, matlab-info
-.PHONY: matlab-clean, matlab-archclean, matlab-distclean
+.PHONY: matlab-all matlab-noprefix matlab-info
+.PHONY: matlab-clean matlab-archclean matlab-distclean
 no_dep_targets += matlab-all matlab-noprefix matlab-info
 no_dep_targets += matlab-clean matlab-archclean matlab-distclean
 

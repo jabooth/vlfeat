@@ -33,8 +33,8 @@ HOST := vlfeat-admin:vlfeat.org/sandbox
 #                                                 Build source package
 # --------------------------------------------------------------------
 
-.PHONY: dist-src, dist-src-clean, dist-src-info
-no_dep_targets += dist-src, dist-src-clean, dist-src-info
+.PHONY: dist-src dist-src-clean dist-src-info
+no_dep_targets += dist-src dist-src-clean dist-src-info
 
 dist-src:
 	COPYFILE_DISABLE=1 \
@@ -70,8 +70,8 @@ dist-src-info:
 #
 # dist-src: Packs the commit vXX.XX.XX.
 
-.PHONY: dist-bin, dist-bin-release, dist-bin-commit, dist-bin-info
-.PHONY: dist-bin-clean, dist-bin-archclean, dist-bin-distclean
+.PHONY: dist-bin dist-bin-release dist-bin-commit dist-bin-info
+.PHONY: dist-bin-clean dist-bin-archclean dist-bin-distclean
 no_dep_targets += dist-bin dist-bin-release dist-bin-commit dist-bin-info
 no_dep_targets += dist-bin-clean dist-bin-archclean dist-bin-distclean
 
@@ -194,7 +194,7 @@ dist-bin-info:
 #                                             Post packages on the web
 # --------------------------------------------------------------------
 
-.PHONY: post, post-doc, post-doc-from-dist
+.PHONY: post post-doc post-doc-from-dist
 
 post:
 	$(RSYNC)                                                     \

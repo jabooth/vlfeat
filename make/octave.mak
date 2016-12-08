@@ -28,41 +28,27 @@ endif
 
 ifdef OCTAVE_ENABLE
 all: octave-mex-all
+endif
+
+# cleaning rules are defined even if OCTAVE_ENABLE is off, so that we can clean
+# up previous build products
 clean: octave-mex-clean
 archclean: octave-mex-archclean
 distclean: octave-mex-distclean
-endif
 
 info: octave-mex-info
 
 OCTAVE_MEX_SUFFIX := mex
 OCTAVE_MEX_BINDIR := toolbox/mex/octave/$(MEX_SUFFIX)
-OCTAVE_MEX_CFLAGS = $(LINK_DLL_CFLAGS) -Itoolbox
+OCTAVE_MEX_INC    := -Itoolbox -I.
+OCTAVE_MEX_CFLAGS = $(LINK_DLL_CFLAGS) $(OCTAVE_MEX_INC)
 OCTAVE_MEX_LDFLAGS = $(LINK_DLL_LDFLAGS) -lm
-
-# Mac OS X on Intel 32 bit processor
-ifeq ($(ARCH),maci)
-endif
-
-# Mac OS X on Intel 64 bit processor
-ifeq ($(ARCH),maci64)
-endif
-
-# Linux on 32 bit processor
-ifeq ($(ARCH),glnx86)
-OCTAVE_MEX_FLAGS += -Wl,--rpath,\\\$$ORIGIN/
-endif
-
-# Linux on 64 bit processorm
-ifeq ($(ARCH),glnxa64)
-OCTAVE_MEX_FLAGS += -Wl,--rpath,\\\$$ORIGIN/
-endif
 
 # --------------------------------------------------------------------
 #                                                                Build
 # --------------------------------------------------------------------
 
-.PHONY: octave-all, octave-mex-all, octave-mex-dir, octave-info
+.PHONY: octave-all octave-mex-all octave-mex-dir octave-info
 .PHONY: octave-clean octave-archclean octave-distclean
 no_dep_targets += octave-info
 no_dep_targets += octave-clean octave-archclean octave-distclean
@@ -71,6 +57,7 @@ octave_mex_src := $(shell find $(VLDIR)/toolbox -name "*.c")
 octave_mex_tgt := $(addprefix $(OCTAVE_MEX_BINDIR)/,\
                   $(notdir $(mex_src:.c=.$(OCTAVE_MEX_SUFFIX)) ) )
 octave_mex_dep := $(octave_mex_tgt:.$(OCTAVE_MEX_SUFFIX)=.d)
+octave_mex_obj := $(notdir $(mex_src:.c=.o))
 octave_mex_dll := $(OCTAVE_MEX_BINDIR)/lib$(DLL_NAME).$(DLL_SUFFIX)
 
 ifdef OCTAVE_ENABLE
@@ -88,8 +75,8 @@ $(eval $(call gendir, octave-mex, $(OCTAVE_MEX_BINDIR)))
 
 $(OCTAVE_MEX_BINDIR)/%.d : %.c $(octave-mex-dir)
 	$(call C,MKOCTFILE) \
-	    $(OCTAVE_MEX_CFLAGS) -M "$(<)"
-	@mv "$(<:.c=.d)" $(OCTAVE_MEX_BINDIR)
+	    $(OCTAVE_MEX_INC) -M "$(<)"
+	@mv "$(notdir $(<:.c=.d))" $(OCTAVE_MEX_BINDIR)
 
 $(octave_mex_dll) : $(dll_tgt)
 	cp -v "$(<)" "$(@)"
@@ -120,7 +107,7 @@ octave-mex-info:
 	@echo
 
 octave-mex-clean:
-	rm -f $(octave_mex_dep)
+	rm -f $(octave_mex_dep) $(octave_mex_obj)
 
 octave-mex-archclean: octave-clean
 	rm -f $(octave_mex_tgt)

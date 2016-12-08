@@ -1,3 +1,21 @@
+# VLFeat for Raspberry Pi
+
+This is a fork of the offical VLFeat repo that adds the patches to
+the Makefiles from Debians package of vlfeat that make it possible
+to compile VLFeat for ARM-based devices like the RaspberryPi.
+
+The changes here will break installs for other platforms, as it
+largely involves just tearing out the arch/platform detection code.
+
+The patches are taken from:
+
+    https://packages.debian.org/source/stretch/vlfeat
+
+and the approprate BSD-licence from the patches is included under the new
+`debian` directory.
+
+------------------------------------------------------------------------------
+
 # VLFeat -- Vision Lab Features Library
 
 > Version 0.9.20
